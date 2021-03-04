@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee</title>
+    <style>
+      body {
+        background-color: #d6d0b4;
+      }
+      .container {
+        border: 2px solid #d6d0b4;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        flex-wrap: wrap;
+      }
+      .container div {
+        margin: 10px;
+        text-align: center;
+        font-size: 20px;
+        color: black;
+      }
+      .container div button {
+        width: 150px;
+        height: 30px;
+        border-radius: 7px;
+      }
+      #editButton {
+        display: none;
+      }
+      .container div input[type="text"],
+      textarea {
+        background-color: whitesmoke;
+        width: 150px;
+        height: 30px;
+        margin-left: 10px;
+        padding-left: 10px;
+      }
+      .item_1 {
+      }
+      .item_2 {
+      }
+      .item_3 {
+      }
+      .item_4 {
+      }
+      .item_5 {
+      }
+      .item_6 {
+      }
+      .item_7 {
+      }
+      .btn_container {
+        border: 2px solid #d6d0b4;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        float: right;
+        height: 100px;
+        width: 170px;
+      }
+      .btn_container button {
+        height: 30px;
+        width: 150px;
+        border-radius: 7px;
+        border-color: none;
+      }
+
+      .table_container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        float: left;
+        height: 500px;
+        width: 80%;
+      }
+      .table_container table {
+        margin-top: -300px;
+      }
+      .button {
+        height: 30px;
+        width: 150px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th {
+        padding: 8px;
+        text-align: left;
+        background-color: tomato;
+      }
+      td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+      img {
+        margin-top: -100px;
+      }
+      input::-webkit-input-placeholder {
+        font-size: 14px;
+        line-height: 2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="item_1"><h2>EMPLOYEE REGISTRATION FORM</h2></div>
+    </div>
+    <div class="container">
+      <div class="item_1">
+        <label> Enter ID</label
+        ><input type="text" id="emp_id" placeholder="Enter Employee Id" />
+      </div>
+      <div class="item_2">
+        <label>Enter Name</label
+        ><input type="text" id="emp_name" placeholder="Enter Employee Name" />
+      </div>
+      <div class="item_3">
+        <label>Enter Age</label
+        ><input type="text" id="emp_age" placeholder="Enter Employee Age" />
+      </div>
+      <div class="item_1">
+        <label>Enter Email</label
+        ><input type="text" id="emp_email" placeholder="Enter Employee Email" />
+      </div>
+      <div class="item_1">
+        <button id="addButton" onclick="add()">ADD EMPLOYEE</button>
+        <button id="editButton" onclick="edit()">UPDATE</button>
+      </div>
+    </div>
+    <div class="btn_container">
+      <button id="btn-clean" onclick="clean_textBoxes()">CLEAR</button>
+      <button id="show-table" onclick="updatetable()">DISPLAY</button>
+    </div>
+    <br />
+    <!-- <strong>CLICK DISPLAY FOR LIST</strong> -->
+    <div class="table_container">
+      <img src="./emp_icon.jpg" width="100%" height="500px" id="img" />
+      <table id="list"></table>
+    </div>
+
+    <!-- ---------------------------- -->
+
+    <script type="text/javascript">
+      window.indexedDB =
+        window.indexedDB ||
+        window.mozIndexedDB ||
+        window.webkitIndexedDB ||
+        window.msIndexedDB;
+      window.IDBTransaction =
+        window.IDBTransaction ||
+        window.webkitIDBTransaction ||
+        window.msIDBTransaction;
+      window.IDBKeyRange =
+        window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+
+      if (!window.indexedDB) {
+        window.alert(
+          "Your browser doesn't support a stable version of IndexedDB."
+        );
+      }
+
+      var db;
+      var request = window.indexedDB.open("newDatabase", 1);
+      request.onerror = function (event) {
+        console.log("error: ");
+      };
+      request.onsuccess = function (event) {
+        db = request.result;
+        console.log("success: " + db);
+      };
+      request.onupgradeneeded = function (event) {
+        var db = event.target.result;
+        var objectStore = db.createObjectStore("employee", { keyPath: "id" });
+      };
+
+      function add() {
+        var e_id = +document.getElementById("emp_id").value; // convert to number by prefix '+'
+        var e_name = document.getElementById("emp_name").value;
+        var e_age = document.getElementById("emp_age").value;
+        var e_email = document.getElementById("emp_email").value;
+        document.getElementById("emp_id").readOnly = false;
+
+        const emp_Obj = {
+          id: e_id,
+          name: e_name,
+          age: e_age,
+          email: e_email,
+        };
+
+        var transaction = db.transaction(["employee"], "readwrite");
+        transaction.oncomplete = function (event) {
+          console.log("all done with transaction");
+        };
+
+        transaction.onerror = function (event) {
+          console.dir(event);
+        };
+
+        var emp_ObjectStore = transaction.objectStore("employee");
+        var request = emp_ObjectStore.add(emp_Obj);
+        console.log(emp_Obj);
+
+        request.onsuccess = function (event) {
+          console.log("added item");
+        };
+
+        clean_textBoxes();
+        updatetable();
+      }
+
+      // --------------------------------------UPDATE-------------------------
+      function updatetable() {
+        document.getElementById("list").innerHTML = "";
+        document.getElementById("img").style = "display:none";
+        var request = db
+          .transaction("employee")
+          .objectStore("employee")
+          .openCursor();
+        request.onerror = function (event) {
+          console.col(event);
+        };
+        document.getElementById(
+          "list"
+        ).innerHTML += `<th>ID</th> <th>NAME</th> <th>AGE</th> <th>EMAIL</th> <th>DELETE</th> <th>EDIT</th>`;
+        request.onsuccess = function (event) {
+          cursor = event.target.result;
+          var selected_id;
+          if (!cursor == 0) {
+            eid = cursor.value.id;
+            document.getElementById("list").innerHTML += `
+            <tr><td> ${cursor.value.id}  </td><td>
+             ${cursor.value.name}  </td><td>   ${cursor.value.age}
+            </td><td>  ${cursor.value.email}</td><td><button  onClick="delete_emp(${cursor.value.id})">Delete </button></td><td><button  onClick="editEmp(${cursor.value.id})">Edit</button></td></tr>`;
+
+            cursor.continue();
+          }
+        };
+      }
+      // --------------------------------------UPDATE ENDS HERE-----------------------------------------
+
+      // ------------------------------------clean Text Boxes after addding the records-----------------
+      function clean_textBoxes() {
+        let id = document.getElementById("emp_id");
+        let name = document.getElementById("emp_name");
+        let age = document.getElementById("emp_age");
+        let email = document.getElementById("emp_email");
+
+        id.value = "";
+        name.value = "";
+        age.value = "";
+        email.value = "";
+      }
+      // ------------------------------------clean Text Boxes ends here-------------------------------
+      function editEmp(id) {
+        var emp_id = document.getElementById("emp_id");
+        var name = document.getElementById("emp_name");
+        var age = document.getElementById("emp_age");
+        var email = document.getElementById("emp_email");
+        var btn_update = (document.getElementById("addButton").style =
+          "display:none");
+        document.getElementById("emp_id").readOnly = true;
+
+        document.getElementById("editButton").style = "display:block";
+        // Step:1 fetch the value by id
+        let transaction = db.transaction("employee", "readwrite");
+        let objectStore = transaction.objectStore("employee");
+        let objectStoreRequest = objectStore.get(id);
+        console.log(objectStoreRequest);
+        objectStoreRequest.onsuccess = function (event) {
+          var myRecord = objectStoreRequest.result;
+          console.log(myRecord.id);
+          emp_id.value = myRecord.id; //display the value in text box
+          name.value = myRecord.name; //display the value in text box
+          age.value = myRecord.age; //display the value in text box
+          email.value = myRecord.email; //display the value in text box
+          //   btn_update.textContent = "Update"; // change add button change into update
+          delete_emp(id);
+          edit(id);
+        };
+      }
+      //------------------------------------Delete function starts from here--------------------------
+      function delete_emp(id) {
+        let request = db
+          .transaction("employee", "readwrite")
+          .objectStore("employee")
+          .delete(id);
+        request.onsuccess = function (event) {
+          // refresh table
+          updatetable();
+        };
+      }
+      // ------------------------------------Delete function ends here--------------------------------
+
+      function edit(id) {
+        var e_id = +document.getElementById("emp_id").value; // convert to number by prefix '+'
+        var e_name = document.getElementById("emp_name").value;
+        var e_age = document.getElementById("emp_age").value;
+        var e_age = document.getElementById("emp_email").value;
+        var btn = (document.getElementById("editButton").style =
+          "display:block");
+
+        const objectStore = db
+          .transaction("employee", "readwrite")
+          .objectStore("employee");
+        const objectStoreTitleRequest = objectStore.get(e_id);
+        objectStoreTitleRequest.onsuccess = () => {
+          const data = objectStoreTitleRequest.result;
+
+          let formData = {
+            id: e_id,
+            name: e_name,
+            age: e_age,
+            email: e_age,
+          };
+          const updateTitleRequest = objectStore.put(formData);
+          console.log(
+            "The transaction that originated this request is " +
+              updateTitleRequest.transaction
+          );
+          updateTitleRequest.onsuccess = () => {
+            // displayData();
+          };
+        };
+      }
+
+      // ------------------------------------edit function ends here--------------------------------
+
+      var html = "";
+      var cursor;
+      function displayEmployee() {
+        var objectStore = db.transaction("employee").objectStore("employee");
+        objectStore.openCursor().onsuccess = function (event) {
+          cursor = event.target.result;
+          if (!cursor == 0) {
+            console.log(cursor.value);
+            cursor.continue();
+          }
+        };
+      }
+    </script>
+  </body>
+</html>
